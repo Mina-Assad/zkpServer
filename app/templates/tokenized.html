@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tokenized</title>
+</head>
+<body>
+    <h1>Generate Token</h1>
+    <form method="post" action="/calculate-tokenized">
+        <label>Key 1:</label><input type="text" name="key1" required><br>
+        <label>Key 2:</label><input type="text" name="key2" required><br>
+        <label>Seed:</label><input type="text" name="seed" required><br>
+        <button type="submit">Calculate Token</button>
+    </form>
+
+    {% if result %}
+        <h2>Token Result:</h2>
+        <p><b>{{ result }}</b></p>
+    {% endif %}
+
+    <a href="/">⬅ Back to Homepage</a>
+</body>
+</html>
+

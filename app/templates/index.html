@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZKP Server Homepage</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2em; }
+  input, button { margin: 0.5em 0; padding: 0.5em; width: 300px; }
+  section { margin-bottom: 2em; }
+  label { display: block; margin-top: 1em; }
+  #log { white-space: pre-wrap; background: #eee; padding: 1em; max-height: 200px; overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<h1>ZKServer Demo Client</h1>
+
+
+<section>
+  <h2>1. Zero-Knowledge Tutorial</h2>
+  <ul>
+    <li><a href="/explain">🔎 How the Token is Calculated (Explain)</a></li>
+    <li><a href="/tokenized">🔐 Generate Token with Keys and Seed (Tokenized)</a></li>
+  </ul>
+</section>
+
+
+<section>
+  <h2>1. Register User</h2>
+  <input id="reg-username" placeholder="Enter username" />
+  <br />
+  <button onclick="registerUser()">Register</button>
+</section>
+
+<section>
+  <h2>2. Request Challenge</h2>
+  <input id="challenge-username" placeholder="Enter username" />
+  <br />
+  <button onclick="requestChallenge()">Get Challenge Key</button>
+</section>
+
+<section>
+  <h2>3. Submit Token for Authentication</h2>
+  <input id="auth-username" placeholder="Enter username" />
+  <input id="auth-token" placeholder="Enter token (from client calculation)" />
+  <br />
+  <button onclick="verifyToken()">Verify Token</button>
+</section>
+
+<section>
+  <h2>Logs</h2>
+  <div id="log"></div>
+</section>
+
+<script>
+  const apiBase = "http://127.0.0.1:8000";
+
+  function log(msg) {
+    const logDiv = document.getElementById('log');
+    logDiv.textContent += msg + '\n';
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function registerUser() {
+    const username = document.getElementById('reg-username').value.trim();
+    if (!username) { alert('Enter a username'); return; }
+    try {
+      const res = await fetch(apiBase + "/register", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        log(`Registered user '${data.username}' with key1: ${data.key1}`);
+      } else {
+        log(`Error: ${data.detail || res.statusText}`);
+      }
+    } catch (e) {
+      log("Network error during register");
+    }
+  }
+
+  async function requestChallenge() {
+    const username = document.getElementById('challenge-username').value.trim();
+    if (!username) { alert('Enter a username'); return; }
+    try {
+      const res = await fetch(apiBase + "/challenge", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        log(`Challenge issued for '${username}', key2: ${data.key2}, seed: ${data.seed}`);
+      } else {
+        log(`Error: ${data.detail || res.statusText}`);
+      }
+    } catch (e) {
+      log("Network error during challenge");
+    }
+  }
+
+  async function verifyToken() {
+    const username = document.getElementById('auth-username').value.trim();
+    const token = Number(document.getElementById('auth-token').value.trim());
+    if (!username || !token) { alert('Fill all auth fields'); return; }
+    try {
+      const res = await fetch(apiBase + "/verify", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, token})
+      });
+      const data = await res.json();
+      if (res.ok) {
+        log(`✅ Authentication success for '${username}'`);
+      } else {
+        log(`❌ Authentication failed: ${data.detail || res.statusText}`);
+      }
+    } catch (e) {
+      log("Network error during verification");
+    }
+  }
+</script>
+
+</body>
+</html>
+
