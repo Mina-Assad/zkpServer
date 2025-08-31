@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 KEY_LENGTH = 4  # Shorter for demo; use 17+ in real use
 
@@ -136,13 +136,13 @@ def verify_token(data: VerifyRequest):
 # --- New Pages ---
 @app.get("/explain", response_class=HTMLResponse)
 async def explain_page(request: Request):
-    return FileResponse(os.path.join(os.path.dirname(__file__), "templates/explain.html"))
-    #return templates.TemplateResponse("explain.html", {"request": request})
+    #return FileResponse(os.path.join(os.path.dirname(__file__), "templates/explain.html"))
+    return templates.TemplateResponse("explain.html", {"request": request})
 
 @app.get("/tokenized", response_class=HTMLResponse)
 async def tokenized_page(request: Request):
-    return FileResponse(os.path.join(os.path.dirname(__file__), "templates/tokenized.html"))
-    #return templates.TemplateResponse("tokenized.html", {"request": request})
+    #return FileResponse(os.path.join(os.path.dirname(__file__), "templates/tokenized.html"))
+    return templates.TemplateResponse("tokenized.html", {"request": request})
 
 @app.post("/calculate-tokenized")
 async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str = Form(...), seed: str = Form(...)):
@@ -154,6 +154,7 @@ async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str
     except ValueError as e:
         return {"error": str(e)}    
     return templates.TemplateResponse("tokenized.html", {"request": request, "result": token})
+
 
 
 
