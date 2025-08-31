@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -151,4 +152,5 @@ async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str
     except ValueError as e:
         return {"error": str(e)}    
     return templates.TemplateResponse("tokenized.html", {"request": request, "result": token})
+
 
