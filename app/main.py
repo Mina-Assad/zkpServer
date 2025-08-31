@@ -9,6 +9,15 @@ import os
 
 app = FastAPI()
 
+# CORS setup
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://zkpserver-uejf.onrender.com/"],   # for dev, allow all
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 templates = Jinja2Templates(directory="templates")
 
 KEY_LENGTH = 4  # Shorter for demo; use 17+ in real use
@@ -142,3 +151,4 @@ async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str
     except ValueError as e:
         return {"error": str(e)}    
     return templates.TemplateResponse("tokenized.html", {"request": request, "result": token})
+
