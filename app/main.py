@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request, Form
 from pydantic import BaseModel
-import math
 import random
 from datetime import datetime, timezone
 from fastapi.responses import FileResponse, HTMLResponse
@@ -21,56 +20,46 @@ app.add_middleware(
 
 templates = Jinja2Templates(directory="app/templates")
 
-KEY_LENGTH = 4  # Shorter for demo; use 17+ in real use
+KEY_LENGTH = 4  # Shorter for demo; use 9+ in real use
 
-def time_seed(offset: int = 0) -> int:
-    now_utc = datetime.now(timezone.utc)
-    return now_utc.day * 100 + now_utc.hour + offset
-
-def round_sig(x, sig=3):
-    if x == 0:
-        return 0
-    order = int(math.floor(math.log10(abs(x))))
-    decimals = sig - order - 1
-    return round(x, decimals)
-
-def tokenize(key1: int, key2: int, seed: int) -> float:
+def tokenize(key1: int, key2: int) -> int:
     l1 = [int(d) for d in str(key1)]
     l2 = [int(d) for d in str(key2)]
     if len(l1) != len(l2):
         raise ValueError("Keys must be the same length.")
-    result = 0
-    for i in range(len(l1)):
-        try:
-            tval = l1[i] * (seed ** l2[i])
-            if tval == 0:
-                val = 0
+    result = []
+    for i in l1:
+        s = 0
+        p1 = 0
+        p2 = i % len(l2)
+        head = -1
+        arr = {0: [], 1: []}
+        while head not in arr[s]:
+            arr[s].append(head)
+            if s == 0:
+                if head != -1:
+                    p2 = (p2 + head) % len(l2)
+                s = (s + 1) % 2
+                head = l2[p2]
             else:
-                val = 10 ** ((math.log(tval, 10)) % 1)
-            temp = math.sin(val) if i % 2 == 0 else math.tan(val)
-            result += temp
-        except OverflowError:
-            result += 0
-    return round_sig(result, KEY_LENGTH)
+                p1 = (p1 + head) % len(l2)
+                s = (s + 1) % 2
+                head = l1[p1]
+        result.append(arr[(s + 1) % 2][-1])
+    return int(''.join(map(str, result)))
 
 class ZKUser:
     def __init__(self, name, key1):
         self.name = name
         self.key1 = key1
         self.key2 = None
-        self.stime = None
-        self.locked = False
 
     def get_challenge_key(self):
         self.key2 = random.randint(10**(KEY_LENGTH - 1), 10**KEY_LENGTH - 1)
-        self.stime = time_seed()
         return self.key2
 
     def verify(self, token):
-        if self.locked and self.stime == time_seed():
-            return False
-        self.locked = True
-        proof = tokenize(self.key1, self.key2, time_seed())
+        proof = tokenize(self.key1, self.key2)
         print("The Real Token Value = ", proof)
         return proof == token
 
@@ -108,7 +97,7 @@ class ChallengeRequest(BaseModel):
 
 class VerifyRequest(BaseModel):
     username: str
-    token: float
+    token: int
 
 @app.get("/")
 def read_root():
@@ -149,8 +138,7 @@ async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str
     try:
         k1 = int(key1)
         k2 = int(key2)
-        s = int(seed)
-        token = tokenize(k1, k2, s)
+        token = tokenize(k1, k2)
     except ValueError as e:
         return {"error": str(e)}    
     return templates.TemplateResponse("tokenized.html", {"request": request, "result": token})
