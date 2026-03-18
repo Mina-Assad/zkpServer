@@ -113,7 +113,7 @@ def issue_challenge(data: ChallengeRequest):
     key2 = zk_server.issue_challenge(data.username)
     if key2 is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"username": data.username, "key2": key2, "seed": time_seed()}
+    return {"username": data.username, "key2": key2}
 
 @app.post("/verify")
 def verify_token(data: VerifyRequest):
