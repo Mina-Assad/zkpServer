@@ -16,39 +16,37 @@
 
 <h1>ZKServer Demo Client</h1>
 
-
 <section>
   <h2>1. Zero-Knowledge Tutorial</h2>
   <ul>
-    <li><a href="https://zkpserver-uejf.onrender.com/explain">🔎 How the Token is Calculated (Explain)</a></li>
-    <li><a href="https://zkpserver-uejf.onrender.com/tokenized">🔐 Generate Token with Keys and Seed (Tokenized)</a></li>
+    <li><a href="/explain">🔎 How the Token is Calculated (Explain)</a></li>
+    <li><a href="/tokenized">🔐 Generate Token with Keys (Tokenized)</a></li>
   </ul>
 </section>
 
-
 <section>
-  <h2>1. Register User</h2>
+  <h2>2. Register User</h2>
   <input id="reg-username" placeholder="Enter username" />
   <br />
   <button onclick="registerUser()">Register</button>
 </section>
 
 <section>
-  <h2>2. Request Challenge</h2>
+  <h2>3. Request Challenge</h2>
   <input id="challenge-username" placeholder="Enter username" />
   <br />
   <button onclick="requestChallenge()">Get Challenge Key</button>
 </section>
 
 <section>
-  <h2>3. Submit Token for Authentication</h2>
+  <h2>4. Submit Token for Authentication</h2>
   <div>
-  <b>NOTE:</b> you can use 
-  <a href="https://zkpserver-uejf.onrender.com/tokenized" target="_blank" rel="noopener noreferrer"><b>THIS</b>**</a> 
-  link to calculate the token
-</div>
+    <b>NOTE:</b> Use 
+    <a href="/tokenized" target="_blank"><b>THIS</b></a> 
+    page to calculate the token using <b>key1 and key2</b>.
+  </div>
   <input id="auth-username" placeholder="Enter username" />
-  <input id="auth-token" placeholder="Enter token (from client calculation)" />
+  <input id="auth-token" placeholder="Enter token (integer)" />
   <br />
   <button onclick="verifyToken()">Verify Token</button>
 </section>
@@ -59,7 +57,7 @@
 </section>
 
 <script>
-  const apiBase = "https://zkpserver-uejf.onrender.com";
+  const apiBase = "";
 
   function log(msg) {
     const logDiv = document.getElementById('log');
@@ -70,19 +68,22 @@
   async function registerUser() {
     const username = document.getElementById('reg-username').value.trim();
     if (!username) { alert('Enter a username'); return; }
+
     try {
-      const res = await fetch(apiBase + "/register", {
+      const res = await fetch("/register", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username})
       });
+
       const data = await res.json();
+
       if (res.ok) {
         log(`Registered user '${data.username}' with key1: ${data.key1}`);
       } else {
         log(`Error: ${data.detail || res.statusText}`);
       }
-    } catch (e) {
+    } catch {
       log("Network error during register");
     }
   }
@@ -90,40 +91,52 @@
   async function requestChallenge() {
     const username = document.getElementById('challenge-username').value.trim();
     if (!username) { alert('Enter a username'); return; }
+
     try {
-      const res = await fetch(apiBase + "/challenge", {
+      const res = await fetch("/challenge", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username})
       });
+
       const data = await res.json();
+
       if (res.ok) {
-        log(`Challenge issued for '${username}', key2: ${data.key2}, seed: ${data.seed}`);
+        log(`Challenge issued for '${username}', key2: ${data.key2}`);
       } else {
         log(`Error: ${data.detail || res.statusText}`);
       }
-    } catch (e) {
+    } catch {
       log("Network error during challenge");
     }
   }
 
   async function verifyToken() {
     const username = document.getElementById('auth-username').value.trim();
-    const token = Number(document.getElementById('auth-token').value.trim());
-    if (!username || !token) { alert('Fill all auth fields'); return; }
+    const tokenValue = document.getElementById('auth-token').value.trim();
+
+    if (!username || !tokenValue) {
+      alert('Fill all auth fields');
+      return;
+    }
+
+    const token = parseInt(tokenValue, 10);
+
     try {
-      const res = await fetch(apiBase + "/verify", {
+      const res = await fetch("/verify", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, token})
       });
+
       const data = await res.json();
+
       if (res.ok) {
         log(`✅ Authentication success for '${username}'`);
       } else {
         log(`❌ Authentication failed: ${data.detail || res.statusText}`);
       }
-    } catch (e) {
+    } catch {
       log("Network error during verification");
     }
   }
@@ -131,4 +144,3 @@
 
 </body>
 </html>
-
