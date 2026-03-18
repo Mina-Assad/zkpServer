@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tokenized</title>
+    <title>Token Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        input, button { margin: 0.5em 0; padding: 0.5em; width: 300px; }
+    </style>
 </head>
 <body>
-    <h1>Generate Token</h1>
-    <form method="post" action="https://zkpserver-uejf.onrender.com/calculate-tokenized">
-        <label>Key 1:</label><input type="text" name="key1" required><br>
-        <label>Key 2:</label><input type="text" name="key2" required><br>
-        <label>Seed:</label><input type="text" name="seed" required><br>
-        <button type="submit">Calculate Token</button>
-    </form>
 
-    {% if result %}
-        <h2>Token Result:</h2>
-        <p><b>{{ result }}</b></p>
-    {% endif %}
-    <!-- <div id="result-container" style="display:none;">
-        <h2>Token Result:</h2>
-        <p><b id="result-text"></b></p>
-    </div>
+<h1>Generate Token</h1>
 
-    <script>
-        // Example: If backend redirects back with a query param like ?result=12345
-        const urlParams = new URLSearchParams(window.location.search);
-        const result = urlParams.get("result");
-        if (result) {
-            document.getElementById("result-text").textContent = result;
-            document.getElementById("result-container").style.display = "block";
-        }
-    </script> -->
+<p>
+    Enter <b>Key 1</b> and <b>Key 2</b> to generate the authentication token.
+</p>
 
-    <a href="https://zkpserver-uejf.onrender.com">⬅ Back to Homepage</a>
+<form method="post" action="/calculate-tokenized">
+    <label>Key 1:</label>
+    <input type="text" name="key1" required><br>
+
+    <label>Key 2:</label>
+    <input type="text" name="key2" required><br>
+
+    <button type="submit">Calculate Token</button>
+</form>
+
+{% if result %}
+    <h2>Token Result:</h2>
+    <p><b>{{ result }}</b></p>
+{% endif %}
+
+<a href="/">⬅ Back to Homepage</a>
+
 </body>
 </html>
-
-
-
