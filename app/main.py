@@ -134,7 +134,7 @@ async def tokenized_page(request: Request):
     return templates.TemplateResponse("tokenized.html", {"request": request})
 
 @app.post("/calculate-tokenized")
-async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str = Form(...), seed: str = Form(...)):
+async def calculate_tokenized(request: Request, key1: str = Form(...), key2: str = Form(...)):
     try:
         k1 = int(key1)
         k2 = int(key2)
